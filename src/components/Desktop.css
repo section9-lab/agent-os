@@ -1,0 +1,257 @@
+.desktop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: url('/background.jpg') center center/cover no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+
+/* Add a subtle overlay to ensure UI elements are visible */
+.desktop::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.1) 0%,
+    rgba(0, 0, 0, 0.05) 50%,
+    rgba(0, 0, 0, 0.15) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.menubar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 28px;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 20px;
+  font-size: 13px;
+  color: white;
+  z-index: 1000;
+}
+
+.menu-section {
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.menu-section:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+  font-size: 12px;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+  cursor: pointer;
+}
+
+.status-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.status-icon {
+  font-size: 14px;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3));
+}
+
+.status-text {
+  font-weight: 500;
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.wifi .status-icon {
+  /* No rotation animations - icon stays static */
+}
+
+.battery .status-icon {
+  position: relative;
+}
+
+.battery .status-icon::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 100%;
+  width: 2px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.8);
+  margin-left: 1px;
+  border-radius: 1px;
+}
+
+.datetime {
+  font-family: 'SF Mono', 'Monaco', 'Menlo', monospace;
+  letter-spacing: 0.5px;
+}
+
+.apple-menu-section {
+  cursor: pointer;
+  user-select: none;
+}
+
+.apple-menu-section:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.apple-logo {
+  margin-right: 6px;
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
+}
+
+.apple-menu-dropdown {
+  position: absolute;
+  top: 28px;
+  left: 0;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 6px;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.04),
+    0 4px 16px rgba(0, 0, 0, 0.12),
+    0 8px 32px rgba(0, 0, 0, 0.08);
+  min-width: 162px;
+  padding: 0.25px 0;
+  z-index: 1001;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  font-size: 1.25px;
+  font-weight: 300;
+  line-height: 1;
+  transform: translateY(-8px);
+  opacity: 0;
+  transition: all 0.18s cubic-bezier(0.2, 0, 0, 1);
+  pointer-events: none;
+}
+
+.apple-menu-dropdown--visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.menu-item {
+  padding: 0.3px 0.2px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  font-weight: 10;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  min-height: 1px;
+  position: relative;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.menu-item:hover {
+  background: rgba(0, 122, 255, 0.12);
+  color: #000;
+}
+
+.menu-item:active {
+  background: rgba(0, 122, 255, 0.25);
+  color: #000;
+  transition: background-color 0.08s ease, color 0.08s ease;
+}
+
+.menu-separator {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.08);
+  margin: 6px 12px;
+  position: relative;
+}
+
+.menu-separator::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right,
+    transparent 0%,
+    rgba(0, 0, 0, 0.08) 8px,
+    rgba(0, 0, 0, 0.08) calc(100% - 8px),
+    transparent 100%
+  );
+}
+
+/* Menu items no longer have icons - removed for cleaner design */
+
+.desktop-content {
+  position: relative;
+  z-index: 2;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  padding: 60px 40px 80px;
+}
+
+.desktop-logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.context-menu {
+  margin-bottom: 25px;
+}
+
+.dock-container {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 998;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 14px;
+  color: #666;
+}
