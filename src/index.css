@@ -2,3 +2,23 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    @apply p-0 m-0 flex items-center justify-center min-h-screen;
+    background-color: rgb(59, 76, 160);
+    background-size: 400px;
+    font-family: sans-serif;
+    font-weight: 300;
+    animation: moveBackground 60s linear infinite;
+  }
+}
+
+@keyframes moveBackground {
+  from {
+    background-position: 0% 0%;
+  }
+  to {
+    background-position: 0% -1000%;
+  }
+}

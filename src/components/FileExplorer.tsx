@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import './FileExplorer.css';
 
 interface FileItem {
   id: string;
@@ -41,24 +40,24 @@ export const FileExplorer: React.FC = () => {
   };
 
   return (
-    <div className="file-explorer">
-      <div className="explorer-toolbar">
-        <button onClick={handleGoBack} className="toolbar-btn">← Back</button>
-        <div className="path-bar">{currentPath}</div>
-        <button className="toolbar-btn">Search</button>
+    <div className="h-full flex flex-col bg-white">
+      <div className="h-10 bg-gray-100 border-b border-gray-300 flex items-center px-3 gap-3">
+        <button onClick={handleGoBack} className="px-3 py-1.5 bg-white border border-gray-400 rounded-md cursor-pointer text-sm transition-colors duration-200 hover:bg-gray-200">← Back</button>
+        <div className="flex-1 px-3 py-1.5 bg-white border border-gray-400 rounded-md text-sm font-mono">{currentPath}</div>
+        <button className="px-3 py-1.5 bg-white border border-gray-400 rounded-md cursor-pointer text-sm transition-colors duration-200 hover:bg-gray-200">Search</button>
       </div>
 
-      <div className="explorer-content">
-        <div className="sidebar">
-          <div className="sidebar-item active">🏠 Home</div>
-          <div className="sidebar-item">💾 Documents</div>
-          <div className="sidebar-item">📥 Downloads</div>
-          <div className="sidebar-item">🖥️ Desktop</div>
-          <div className="sidebar-item">⚙️ Settings</div>
+      <div className="flex-1 flex overflow-hidden">
+        <div className="w-50 bg-gray-50 border-r border-gray-300 py-3">
+          <div className="px-4 py-2 cursor-pointer text-sm transition-colors duration-200 bg-blue-500 text-white">🏠 Home</div>
+          <div className="px-4 py-2 cursor-pointer text-sm transition-colors duration-200 hover:bg-gray-200">💾 Documents</div>
+          <div className="px-4 py-2 cursor-pointer text-sm transition-colors duration-200 hover:bg-gray-200">📥 Downloads</div>
+          <div className="px-4 py-2 cursor-pointer text-sm transition-colors duration-200 hover:bg-gray-200">🖥️ Desktop</div>
+          <div className="px-4 py-2 cursor-pointer text-sm transition-colors duration-200 hover:bg-gray-200">⚙️ Settings</div>
         </div>
 
-        <div className="file-list">
-          <div className="file-header">
+        <div className="flex-1 overflow-auto">
+          <div className="grid grid-cols-[1fr_100px_120px] px-4 py-2 bg-gray-100 border-b border-gray-300 text-xs font-semibold text-gray-600">
             <div>Name</div>
             <div>Size</div>
             <div>Modified</div>
@@ -66,15 +65,15 @@ export const FileExplorer: React.FC = () => {
           {files.map((file) => (
             <div
               key={file.id}
-              className={`file-item ${selectedItem === file.id ? 'selected' : ''}`}
+              className={`grid grid-cols-[1fr_100px_120px] px-4 py-2 border-b border-gray-100 cursor-pointer text-sm transition-colors duration-200 hover:bg-gray-50 ${selectedItem === file.id ? 'bg-blue-500 text-white' : ''}`}
               onClick={() => handleItemClick(file)}
             >
-              <div className="file-name">
-                <span className="file-icon">{file.icon}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-base">{file.icon}</span>
                 {file.name}
               </div>
-              <div className="file-size">{file.size || '--'}</div>
-              <div className="file-modified">{file.modified || '--'}</div>
+              <div className={`text-xs ${selectedItem === file.id ? 'text-white/80' : 'text-gray-600'}`}>{file.size || '--'}</div>
+              <div className={`text-xs ${selectedItem === file.id ? 'text-white/80' : 'text-gray-600'}`}>{file.modified || '--'}</div>
             </div>
           ))}
         </div>

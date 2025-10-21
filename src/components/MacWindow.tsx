@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import './MacWindow.css';
 
 interface MacWindowProps {
   title: string;
@@ -65,34 +64,35 @@ export const MacWindow: React.FC<MacWindowProps> = ({
   return (
     <div
       ref={windowRef}
-      className={`mac-window ${isMaximized ? 'maximized' : ''}`}
+      className={`fixed bg-white/95 backdrop-blur-glass rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.2)] overflow-hidden z-[1000] min-w-[400px] min-h-[300px] w-[800px] h-[600px] ${isMaximized ? 'rounded-none w-screen h-screen' : ''}`}
       style={{
         left: isMaximized ? 0 : `${position.x}px`,
-        top: isMaximized ? 0 : `${position.y}px`
+        top: isMaximized ? 0 : `${position.y}px`,
+        transition: 'none'
       }}
     >
-      <div className="window-titlebar" onMouseDown={handleMouseDown}>
-        <div className="window-controls">
+      <div className="h-9 bg-gradient-to-b from-white/80 to-white/60 border-b border-black/10 flex items-center px-3 cursor-move select-none" onMouseDown={handleMouseDown}>
+        <div className="flex gap-2 items-center">
           <button
-            className="window-control close"
+            className="w-3 h-3 rounded-full border-none cursor-pointer transition-transform duration-200 hover:scale-110 relative bg-mac-red hover:bg-mac-red-hover"
             onClick={onClose}
             title="Close"
           />
           <button
-            className="window-control minimize"
+            className="w-3 h-3 rounded-full border-none cursor-pointer transition-transform duration-200 hover:scale-110 relative bg-mac-yellow hover:bg-mac-yellow-hover"
             onClick={onMinimize}
             title="Minimize"
           />
           <button
-            className={`window-control maximize ${isMaximized ? 'restore' : ''}`}
+            className={`w-3 h-3 rounded-full border-none cursor-pointer transition-transform duration-200 hover:scale-110 relative bg-mac-green hover:bg-mac-green-hover ${isMaximized ? 'restore' : ''}`}
             onClick={onMaximize}
             title={isMaximized ? "Restore" : "Maximize"}
           />
         </div>
-        <div className="window-title">{title}</div>
-        <div className="window-spacer" />
+        <div className="flex-1 text-center text-sm font-medium text-gray-700 pointer-events-none">{title}</div>
+        <div className="w-[52px]" />
       </div>
-      <div className="window-content">
+      <div className="h-[calc(100%-36px)] overflow-auto bg-[rgba(248,248,248,0.8)]">
         {children}
       </div>
     </div>
