@@ -4,7 +4,9 @@
 
 A revolutionary web-based AI agent platform that reimagines what an operating system can be in the age of artificial intelligence. Agent-OS transforms the traditional desktop paradigm into an intelligent, fluid interface where AI agents collaborate to accomplish complex tasks in the virtual web environment.
 
-[](/public/demo/demo.png)
+
+![demo](/public/demo/demo.png)
+
 
 ## 🌟 Vision
 
