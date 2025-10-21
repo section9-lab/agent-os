@@ -154,7 +154,7 @@ export const Desktop: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 bg-cover bg-center bg-no-repeat bg-[url('/background.jpg')] overflow-hidden">
+    <div className="fixed inset-0 bg-cover bg-center bg-no-repeat bg-[url('/background.svg')] overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/5 to-black/15 pointer-events-none z-[1]" />
       <GlassFilter />
 
