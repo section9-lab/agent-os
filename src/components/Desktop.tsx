@@ -3,9 +3,10 @@ import { MacWindow } from './MacWindow';
 import { GlassFilter } from './GlassFilter';
 import { Dock } from './Dock';
 import { getApplication } from './AppLauncher';
-import wifiIcon from '/public/wifi.svg';
-import batteryIcon from '/public/battery.svg';
-import appleIcon from '/public/apple.svg';
+// Using direct URL references for public assets
+const wifiIcon = '/wifi.svg';
+const batteryIcon = '/battery.svg';
+const appleIcon = '/apple.svg';
 
 
 interface OpenWindow {
