@@ -19,6 +19,14 @@ export const applications: Application[] = [
     initialHeight: 600
   },
   {
+    id: 'safari',
+    name: 'Safari',
+    icon: '🧭',
+    component: React.lazy(() => import('./Safari').then(mod => ({ default: mod.Safari }))),
+    initialWidth: 1024,
+    initialHeight: 768
+  },
+  {
     id: 'notes',
     name: 'Notes',
     icon: '📝',
