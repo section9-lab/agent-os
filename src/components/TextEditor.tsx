@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
-export const TextEditor: React.FC = () => {
-  const [content, setContent] = useState(`# Welcome to Liquid Glass Lab
+const initialContent = `# Welcome to Agent-OS
 
-This is a simple text editor built with React and styled with the beautiful liquid glass effect.
+This is a simple text editor built with React and styled with the liquid glass desktop demo.
 
 ## Features
 - ✨ Beautiful glass morphism design
@@ -12,20 +11,24 @@ This is a simple text editor built with React and styled with the beautiful liqu
 - 🎨 Smooth animations
 
 ## Getting Started
-1. Click and drag the window to move it
-2. Use the window controls to close, minimize, or maximize
-3. Try the different applications in the dock
+1. Open apps from the dock
+2. Drag windows around the desktop
+3. Use Safari to preview embeddable websites
 
-Happy coding! 🚀`);
+Happy coding! 🚀`;
 
-  const [wordCount, setWordCount] = useState(0);
-  const [charCount, setCharCount] = useState(0);
+export const TextEditor: React.FC = () => {
+  const [content, setContent] = useState(initialContent);
+
+  const { wordCount, charCount } = useMemo(() => {
+    return {
+      wordCount: content.trim() ? content.trim().split(/\s+/).length : 0,
+      charCount: content.length,
+    };
+  }, [content]);
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const text = e.target.value;
-    setContent(text);
-    setWordCount(text.trim() ? text.trim().split(/\s+/).length : 0);
-    setCharCount(text.length);
+    setContent(e.target.value);
   };
 
   return (

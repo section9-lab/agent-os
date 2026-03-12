@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { MacWindow } from './MacWindow';
 import { GlassFilter } from './GlassFilter';
 import { Dock } from './Dock';
 import { getApplication } from './AppLauncher';
-// Using direct URL references for public assets
+
 const wifiIcon = '/wifi.svg';
 const batteryIcon = '/battery.svg';
 const appleIcon = '/apple.svg';
-
 
 interface OpenWindow {
   id: string;
@@ -26,7 +25,6 @@ export const Desktop: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showAppleMenu, setShowAppleMenu] = useState(false);
 
-  // Update time every second
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -35,7 +33,6 @@ export const Desktop: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Close Apple menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -48,7 +45,6 @@ export const Desktop: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showAppleMenu]);
 
-  // Wi-Fi always connected - no status changes needed
   const handleAppleMenuClick = () => {
     setShowAppleMenu(!showAppleMenu);
   };
@@ -56,7 +52,6 @@ export const Desktop: React.FC = () => {
   const handleMenuItemClick = (action: string) => {
     console.log(`Menu action: ${action}`);
     setShowAppleMenu(false);
-    // Here you can implement the actual functionality for each menu item
   };
 
   const menuItems = [
@@ -72,7 +67,7 @@ export const Desktop: React.FC = () => {
     { label: '关机...', action: 'shutdown' },
     { separator: true },
     { label: '锁定屏幕', action: 'lock-screen' },
-    { label: '推出登录...', action: 'logout' }
+    { label: '推出登录...', action: 'logout' },
   ];
 
   const getCurrentDateTime = () => {
@@ -82,67 +77,74 @@ export const Desktop: React.FC = () => {
       day: 'numeric',
       hour: 'numeric',
       minute: '2-digit',
-      hour12: false
+      hour12: false,
     };
     return currentTime.toLocaleDateString('en-US', options);
+  };
+
+  const bringToFront = (windowId: string) => {
+    setActiveWindowId(windowId);
   };
 
   const openApplication = (appId: string) => {
     const app = getApplication(appId);
     if (!app) return;
 
-    const existingWindow = openWindows.find(w => w.appId === appId);
+    const existingWindow = openWindows.find(window => window.appId === appId);
 
     if (existingWindow) {
-      // If window exists and is minimized, restore it
-      if (existingWindow.isMinimized) {
-        setOpenWindows(prev => prev.map(w =>
-          w.id === existingWindow.id
-            ? { ...w, isMinimized: false }
-            : w
-        ));
-        setActiveWindowId(existingWindow.id);
-      }
-      // If window exists, bring it to front
+      setOpenWindows(prev =>
+        prev.map(window =>
+          window.id === existingWindow.id ? { ...window, isMinimized: false } : window,
+        ),
+      );
       setActiveWindowId(existingWindow.id);
-    } else {
-      // Create new window
-      const newWindow: OpenWindow = {
-        id: `window-${Date.now()}`,
-        appId,
-        title: app.name,
-        isOpen: true,
-        isMinimized: false,
-        isMaximized: false,
-        position: { x: 100 + openWindows.length * 30, y: 50 + openWindows.length * 30 },
-        size: {
-          width: app.initialWidth || 600,
-          height: app.initialHeight || 400
-        }
-      };
-
-      setOpenWindows(prev => [...prev, newWindow]);
-      setActiveWindowId(newWindow.id);
+      return;
     }
+
+    const newWindow: OpenWindow = {
+      id: `window-${Date.now()}`,
+      appId,
+      title: app.name,
+      isOpen: true,
+      isMinimized: false,
+      isMaximized: false,
+      position: { x: 100 + openWindows.length * 30, y: 60 + openWindows.length * 30 },
+      size: {
+        width: app.initialWidth || 600,
+        height: app.initialHeight || 400,
+      },
+    };
+
+    setOpenWindows(prev => [...prev, newWindow]);
+    setActiveWindowId(newWindow.id);
   };
 
   const closeWindow = (windowId: string) => {
-    setOpenWindows(prev => prev.filter(w => w.id !== windowId));
-    if (activeWindowId === windowId) {
-      setActiveWindowId(null);
-    }
+    const visibleWindows = openWindows.filter(window => window.id !== windowId && !window.isMinimized);
+    setOpenWindows(prev => prev.filter(window => window.id !== windowId));
+    setActiveWindowId(visibleWindows.length ? visibleWindows[visibleWindows.length - 1].id : null);
   };
 
   const minimizeWindow = (windowId: string) => {
-    setOpenWindows(prev => prev.map(w =>
-      w.id === windowId ? { ...w, isMinimized: true } : w
-    ));
+    const remainingVisibleWindows = openWindows.filter(window => window.id !== windowId && !window.isMinimized);
+    setOpenWindows(prev => prev.map(window => (window.id === windowId ? { ...window, isMinimized: true } : window)));
+    if (activeWindowId === windowId) {
+      setActiveWindowId(remainingVisibleWindows.length ? remainingVisibleWindows[remainingVisibleWindows.length - 1].id : null);
+    }
   };
 
   const maximizeWindow = (windowId: string) => {
-    setOpenWindows(prev => prev.map(w =>
-      w.id === windowId ? { ...w, isMaximized: !w.isMaximized } : w
-    ));
+    setOpenWindows(prev =>
+      prev.map(window =>
+        window.id === windowId ? { ...window, isMaximized: !window.isMaximized } : window,
+      ),
+    );
+    setActiveWindowId(windowId);
+  };
+
+  const moveWindow = (windowId: string, position: { x: number; y: number }) => {
+    setOpenWindows(prev => prev.map(window => (window.id === windowId ? { ...window, position } : window)));
   };
 
   const renderWindowContent = (appId: string) => {
@@ -153,53 +155,64 @@ export const Desktop: React.FC = () => {
     return <Component />;
   };
 
+  const visibleWindows = useMemo(
+    () => openWindows.filter(window => window.isOpen && !window.isMinimized),
+    [openWindows],
+  );
+
+  const orderedWindows = useMemo(() => {
+    if (!activeWindowId) return visibleWindows;
+
+    const inactiveWindows = visibleWindows.filter(window => window.id !== activeWindowId);
+    const activeWindow = visibleWindows.find(window => window.id === activeWindowId);
+    return activeWindow ? [...inactiveWindows, activeWindow] : visibleWindows;
+  }, [activeWindowId, visibleWindows]);
+
   return (
-    <div className="fixed inset-0 bg-cover bg-center bg-no-repeat bg-[url('/background.svg')] overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/5 to-black/15 pointer-events-none z-[1]" />
+    <div className="fixed inset-0 overflow-hidden bg-[url('/background.svg')] bg-cover bg-center bg-no-repeat">
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-black/10 via-black/5 to-black/15" />
       <GlassFilter />
 
-      {/* Menu Bar */}
-      <div className="fixed top-0 left-0 right-0 h-7 bg-black/30 backdrop-blur-glass border-b border-white/10 flex items-center px-3 gap-5 text-xs text-white z-[1000]">
-        <img src={appleIcon} alt="apple" className="w-4 h-4" onClick={handleAppleMenuClick}/>
-        <div className="cursor-pointer px-2 py-1 rounded transition-colors duration-200 hover:bg-white/20 select-none" >
+      <div className="fixed left-0 right-0 top-0 z-[1000] flex h-7 items-center gap-5 border-b border-white/10 bg-black/30 px-3 text-xs text-white backdrop-blur-glass">
+        <img src={appleIcon} alt="apple" className="apple-menu-section h-4 w-4 cursor-pointer" onClick={handleAppleMenuClick} />
+        <div className="cursor-pointer select-none rounded px-2 py-1 transition-colors duration-200 hover:bg-white/20">
           <span>Agent-OS</span>
         </div>
-        <div className="cursor-pointer px-2 py-1 rounded transition-colors duration-200 hover:bg-white/20">File</div>
-        <div className="cursor-pointer px-2 py-1 rounded transition-colors duration-200 hover:bg-white/20">Edit</div>
-        <div className="cursor-pointer px-2 py-1 rounded transition-colors duration-200 hover:bg-white/20">View</div>
-        <div className="cursor-pointer px-2 py-1 rounded transition-colors duration-200 hover:bg-white/20">Window</div>
-        <div className="cursor-pointer px-2 py-1 rounded transition-colors duration-200 hover:bg-white/20">Help</div>
+        <div className="cursor-pointer rounded px-2 py-1 transition-colors duration-200 hover:bg-white/20">File</div>
+        <div className="cursor-pointer rounded px-2 py-1 transition-colors duration-200 hover:bg-white/20">Edit</div>
+        <div className="cursor-pointer rounded px-2 py-1 transition-colors duration-200 hover:bg-white/20">View</div>
+        <div className="cursor-pointer rounded px-2 py-1 transition-colors duration-200 hover:bg-white/20">Window</div>
+        <div className="cursor-pointer rounded px-2 py-1 transition-colors duration-200 hover:bg-white/20">Help</div>
 
-        {/* Status Bar */}
-        <div className="flex items-center gap-3 ml-auto text-xs text-white">
-          <div className="flex items-center gap-1 px-2 py-1 rounded transition-colors duration-200 cursor-pointer hover:bg-white/10">
-            <span className="text-sm drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]">
-              <img src={wifiIcon} alt="WiFi" className="w-6 h-6" />
-            </span>
-
+        <div className="ml-auto flex items-center gap-3 text-xs text-white">
+          <div className="flex cursor-pointer items-center gap-1 rounded px-2 py-1 transition-colors duration-200 hover:bg-white/10">
+            <img src={wifiIcon} alt="WiFi" className="h-6 w-6" />
           </div>
-          <div className="flex items-center gap-1 px-2 py-1 rounded transition-colors duration-200 cursor-pointer hover:bg-white/10">
-            <img src={batteryIcon} alt="Battery" className="w-6 h-6" />
+          <div className="flex cursor-pointer items-center gap-1 rounded px-2 py-1 transition-colors duration-200 hover:bg-white/10">
+            <img src={batteryIcon} alt="Battery" className="h-6 w-6" />
           </div>
-          <div className="flex items-center gap-1 px-2 py-1 rounded transition-colors duration-200 cursor-pointer hover:bg-white/10">
+          <div className="flex cursor-pointer items-center gap-1 rounded px-2 py-1 transition-colors duration-200 hover:bg-white/10">
             <span className="font-medium">{getCurrentDateTime()}</span>
           </div>
         </div>
 
-        {/* Apple Menu Dropdown */}
         {showAppleMenu && (
-          <div className="absolute top-7 left-2 bg-white/60 backdrop-blur-glass saturate-180 border border-black/8 rounded-md shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.12),0_8px_32px_rgba(0,0,0,0.08)] min-w-[162px] py-[0.25px] z-[1001] text-[#1d1d1f] text-[13px] font-light leading-none transform -translate-y-2 opacity-0 transition-all duration-[0.18s] ease-[cubic-bezier(0.2,0,0,1)] pointer-events-none"
-              style={{ transform: 'translateY(0)', opacity: 1, pointerEvents: 'auto' }}>
+          <div
+            className="apple-menu-dropdown absolute left-2 top-7 z-[1001] min-w-[162px] rounded-md border border-black/8 bg-white/60 py-[0.25px] text-[13px] font-light leading-none text-[#1d1d1f] opacity-100 shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.12),0_8px_32px_rgba(0,0,0,0.08)] backdrop-blur-glass saturate-180 transition-all duration-[0.18s] ease-[cubic-bezier(0.2,0,0,1)]"
+            style={{ transform: 'translateY(0)', pointerEvents: 'auto' }}
+          >
             {menuItems.map((item, index) => {
               if (item.separator) {
-                return <div key={`separator-${index}`} className="h-px bg-black/8 mx-3 my-[6px] relative">
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/8 to-transparent"></div>
-                      </div>;
+                return (
+                  <div key={`separator-${index}`} className="relative mx-3 my-[6px] h-px bg-black/8">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/8 to-transparent" />
+                  </div>
+                );
               }
               return (
                 <div
                   key={item.action}
-                  className="px-3 py-0.5 text-xs cursor-pointer transition-colors duration-[0.15s] ease-out font-normal flex items-center min-h-[19px] relative whitespace-nowrap select-none hover:bg-[rgba(0,122,255,0.12)] hover:text-black active:bg-[rgba(0,122,255,0.25)] active:text-black active:transition-colors active:duration-[0.08s] active:ease-out"
+                  className="relative flex min-h-[19px] cursor-pointer select-none items-center whitespace-nowrap px-3 py-0.5 text-xs font-normal transition-colors duration-[0.15s] ease-out hover:bg-[rgba(0,122,255,0.12)] hover:text-black active:bg-[rgba(0,122,255,0.25)] active:text-black active:duration-[0.08s]"
                   data-action={item.action}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -214,8 +227,7 @@ export const Desktop: React.FC = () => {
         )}
       </div>
 
-      {/* Open Windows */}
-      {openWindows.map((window) => {
+      {orderedWindows.map((window, index) => {
         const app = getApplication(window.appId);
         if (!app) return null;
 
@@ -224,20 +236,24 @@ export const Desktop: React.FC = () => {
             key={window.id}
             title={window.title}
             isOpen={window.isOpen && !window.isMinimized}
+            isMaximized={window.isMaximized}
+            position={window.position}
+            size={window.size}
+            zIndex={100 + index}
+            onFocus={() => bringToFront(window.id)}
+            onMove={(position) => moveWindow(window.id, position)}
             onClose={() => closeWindow(window.id)}
             onMinimize={() => minimizeWindow(window.id)}
             onMaximize={() => maximizeWindow(window.id)}
-            isMaximized={window.isMaximized}
           >
-            <React.Suspense fallback={<div className="flex items-center justify-center h-full text-sm text-gray-500">Loading...</div>}>
+            <React.Suspense fallback={<div className="flex h-full items-center justify-center text-sm text-gray-500">Loading...</div>}>
               {renderWindowContent(window.appId)}
             </React.Suspense>
           </MacWindow>
         );
       })}
 
-      {/* Dock */}
-      <div className="fixed bottom-5 left-1/2 transform -translate-x-1/2 z-[998]">
+      <div className="fixed bottom-5 left-1/2 z-[998] -translate-x-1/2 transform">
         <Dock onDockItemClick={openApplication} />
       </div>
     </div>

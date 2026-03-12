@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface Tab {
   id: string;
@@ -18,7 +18,7 @@ export const Safari: React.FC = () => {
   const [loadError, setLoadError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const loadTimeoutRef = useRef<NodeJS.Timeout>();
+  const loadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const activeTab = tabs.find(tab => tab.id === activeTabId);
 
@@ -36,6 +36,24 @@ export const Safari: React.FC = () => {
       }
     };
   }, []);
+
+  const scheduleLoadTimeout = () => {
+    if (loadTimeoutRef.current) {
+      clearTimeout(loadTimeoutRef.current);
+    }
+
+    loadTimeoutRef.current = setTimeout(() => {
+      setIsLoading(false);
+      setLoadError(true);
+      setTabs(prevTabs =>
+        prevTabs.map(tab =>
+          tab.id === activeTabId
+            ? { ...tab, loadError: true }
+            : tab
+        )
+      );
+    }, 15000);
+  };
 
   const handleNewTab = () => {
     const newTab: Tab = {
@@ -76,28 +94,15 @@ export const Safari: React.FC = () => {
     setLoadError(false);
     setRetryCount(0);
 
-    const updatedTabs = tabs.map(tab =>
-      tab.id === activeTabId
-        ? { ...tab, url: finalUrl, title: finalUrl, loadError: false }
-        : tab
-    );
-    setTabs(updatedTabs);
-    setInputUrl(finalUrl);
-
-    // 设置15秒超时，检测是否加载失败
-    if (loadTimeoutRef.current) {
-      clearTimeout(loadTimeoutRef.current);
-    }
-    loadTimeoutRef.current = setTimeout(() => {
-      setIsLoading(false);
-      setLoadError(true);
-      const errorTabs = tabs.map(tab =>
+    setTabs(prevTabs =>
+      prevTabs.map(tab =>
         tab.id === activeTabId
-          ? { ...tab, loadError: true }
+          ? { ...tab, url: finalUrl, title: finalUrl, loadError: false }
           : tab
-      );
-      setTabs(errorTabs);
-    }, 15000);
+      )
+    );
+    setInputUrl(finalUrl);
+    scheduleLoadTimeout();
   };
 
   const handleIframeLoad = () => {
@@ -105,7 +110,6 @@ export const Safari: React.FC = () => {
       clearTimeout(loadTimeoutRef.current);
     }
 
-    // iframe 加载完成，直接设置加载状态为 false
     setIsLoading(false);
     setLoadError(false);
   };
@@ -117,12 +121,13 @@ export const Safari: React.FC = () => {
     setIsLoading(false);
     setLoadError(true);
 
-    const errorTabs = tabs.map(tab =>
-      tab.id === activeTabId
-        ? { ...tab, loadError: true }
-        : tab
+    setTabs(prevTabs =>
+      prevTabs.map(tab =>
+        tab.id === activeTabId
+          ? { ...tab, loadError: true }
+          : tab
+      )
     );
-    setTabs(errorTabs);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -141,20 +146,7 @@ export const Safari: React.FC = () => {
         iframeRef.current.src = activeTab.url;
       }
 
-      // 重置超时
-      if (loadTimeoutRef.current) {
-        clearTimeout(loadTimeoutRef.current);
-      }
-      loadTimeoutRef.current = setTimeout(() => {
-        setIsLoading(false);
-        setLoadError(true);
-        const errorTabs = tabs.map(tab =>
-          tab.id === activeTabId
-            ? { ...tab, loadError: true }
-            : tab
-        );
-        setTabs(errorTabs);
-      }, 15000);
+      scheduleLoadTimeout();
     }
   };
 
